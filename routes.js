@@ -2,15 +2,16 @@
 
 // grab the nerd model we just created
 var Word        = require('./word');
+var Article     = require('./article');    
+
 var fs          = require('fs');
 var bcrypt      = require('bcrypt-nodejs');
 var jwt         = require('jsonwebtoken');
 
 module.exports = function(app) {
 
-    // server routes ===========================================================
-    // handle things like api calls
-    // authentication routes
+    // WORDS
+    // Insert a word singly
     app.post('/api/words', function(req, res) {
         
         // create a new user
@@ -34,7 +35,8 @@ module.exports = function(app) {
             if (words.length > 0) {
                 res.json({
                     success: false,
-                    message: 'Word already exists'
+                    message: 'Word already exists',
+                    words: words
                 });
             }
             else {
@@ -78,6 +80,104 @@ module.exports = function(app) {
         });
     });
 
+    // get information on a word
+    app.get('/api/words/:word', function(req, res) {
+        Word.find({
+            word: req.params.word
+        }, function(err, words){
 
+            if (err) {
+                return res.json({ message: 'No words exists for this word'});
+            }
 
+            res.json(words);
+        });
+    });
+
+    // ARTICLES
+    // create a new word
+    app.post('/api/articles', function(req, res) {
+        // create a new article
+        var newArticle = Article({
+          source: req.body.source,
+          headline: req.body.headline,
+          date: req.body.date
+        });
+
+        // we need to make sure that we don't already have this article
+        // signed up with this email address
+        Word.find({
+            source: req.body.source,
+            headline: req.body.headline,
+        }, function (err, articles) {
+            if (err) 
+                res.json({
+                    success: false,
+                    message: err
+                });
+
+            if (articles.length > 0) {
+                res.json({
+                    success: false,
+                    message: 'Article already exists',
+                    articles: articles
+                });
+            }
+            else {
+
+                // save the article
+                newArticle.save(function(err) {
+                    if (err) {
+                        return res.json({ 
+                            success: false, 
+                            message: 'error saving article: ' + err
+                        });
+                    } 
+
+                    // now let's look them up!
+                    Article.findOne({ 
+                        source: req.body.source,
+                        headline: req.body.headline
+                        },
+                        function(err, article){
+                            if (err){
+                                res.json({ 
+                                    message: 'Error occured: ' + err,
+                                    success: false
+                                });
+                            }
+
+                            if (!article) {
+                                res.json({ 
+                                    message: 'Article doesnt exist',
+                                    success: false
+                                }); 
+                            } else {
+
+                                res.json({ 
+                                    success: true, 
+                                    message: 'article created successfully!',
+                                    article: article
+                                });
+                            }
+                        });
+                });
+            } 
+        });
+    });
+
+    // get an article
+    app.get('/api/articles/:source/:headline', function(req, res) {
+        Article.find({
+            source: req.params.source,
+            headline: req.params.headline
+        }, function(err, articles){
+
+            if (err) {
+                return res.json({ message: 'Article not found!'});
+            }
+
+            res.json(articles);
+        });
+    });
 };
