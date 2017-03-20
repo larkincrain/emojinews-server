@@ -9,6 +9,7 @@ var bcrypt 		   = require('bcrypt-nodejs');
 var jwt 		   = require('jsonwebtoken');
 var serveStatic	   = require('serve-static');
 var mongoose 	   = require('mongoose');
+var cors 		   = require('cors');
 
 // configuration ===========================================
     
@@ -46,6 +47,8 @@ app.use(methodOverride('X-HTTP-Method-Override'));
 app.use(express.static(__dirname + '/public')); 
 //app.use(serveStatic('public/ftp', {'index': ['index.html']}))
 
+app.use(cors());
+
 // Connect to the hosted mongo DB instance
 mongoose.connect( db.url, function (error) {
     if (error) console.error(error);
@@ -65,6 +68,7 @@ app.listen(port);
 
 // shoutout to the user                     
 console.log('Magic happens on port ' + port);
+console.log('Lets get ready to rock');
 
 // expose app           
 exports = module.exports = app;

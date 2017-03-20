@@ -97,6 +97,9 @@ module.exports = function(app) {
     // ARTICLES
     // create a new word
     app.post('/api/articles', function(req, res) {
+        
+        console.log('got a request! Source: ' + req.body.source + ', headline: ' + req.body.headline);
+
         // create a new article
         var newArticle = Article({
           source: req.body.source,
@@ -106,7 +109,7 @@ module.exports = function(app) {
 
         // we need to make sure that we don't already have this article
         // signed up with this email address
-        Word.find({
+        Article.find({
             source: req.body.source,
             headline: req.body.headline,
         }, function (err, articles) {
