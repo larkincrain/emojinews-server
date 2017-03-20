@@ -7,6 +7,7 @@ var Article     = require('./article');
 var fs          = require('fs');
 var bcrypt      = require('bcrypt-nodejs');
 var jwt         = require('jsonwebtoken');
+var _           = require('lodash');
 
 module.exports = function(app) {
 
@@ -181,6 +182,34 @@ module.exports = function(app) {
             }
 
             res.json(articles);
+        });
+    });
+
+    //EMOJIS
+    // add an emoji to an article
+    app.post('/api/emojis', function(req, res) {
+        // find the article that is passed in
+        console.log('got a request! Source: ' + req.body.source + ', headline: ' + req.body.headline);
+
+        // we need to make sure that we don't already have this article
+        // signed up with this email address
+        Article.find({
+            source: req.body.source,
+            headline: req.body.headline,
+        }, function (err, articles) {
+            if (err) 
+                res.json({
+                    success: false,
+                    message: err
+                });
+
+            if (articles.length == 1) {
+                // then we have the article we need to add the emoji to
+                var article = articles[0];
+
+                // see if there is an instance of this emoji in the article already
+                article.
+            }
         });
     });
 };
