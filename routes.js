@@ -208,7 +208,35 @@ module.exports = function(app) {
                 var article = articles[0];
 
                 // see if there is an instance of this emoji in the article already
-                article.
+                var emojiIndex = _.findIndex(
+                    article.emojis, 
+                    { 'emoji': req.body.emoji});
+
+                // if the index is greater than -1, then we need to increment the count
+                if (emojiIndex > -1)
+                    article.emojis[emojiIndex].count ++;
+                else {
+                    article.emojis[article.emojis.length] = {
+                        'emoji': req.body.emoji,
+                        'count': 1
+                    };
+                }
+
+                article.save(function(err) {
+                    if (err) {
+                        return res.json({ 
+                            success: false, 
+                            message: 'error saving emoji to article: ' + err
+                        });
+                    }
+                    
+                    res.json({ 
+                        success: true, 
+                        message: 'emoji saved to article successfully!',
+                        article: article
+                    });
+
+                });
             }
         });
     });
