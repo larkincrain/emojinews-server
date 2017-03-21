@@ -99,8 +99,6 @@ module.exports = function(app) {
     // create a new word
     app.post('/api/articles', function(req, res) {
         
-        console.log('got a request! Source: ' + req.body.source + ', headline: ' + req.body.headline);
-
         // create a new article
         var newArticle = Article({
           source: req.body.source,
@@ -193,10 +191,12 @@ module.exports = function(app) {
 
         // we need to make sure that we don't already have this article
         // signed up with this email address
+
         Article.find({
             source: req.body.source,
             headline: req.body.headline,
         }, function (err, articles) {
+
             if (err) 
                 res.json({
                     success: false,
@@ -212,30 +212,39 @@ module.exports = function(app) {
                     article.emojis, 
                     { 'emoji': req.body.emoji});
 
+
+                var emojis = article.emojis;
+
                 // if the index is greater than -1, then we need to increment the count
-                if (emojiIndex > -1)
-                    article.emojis[emojiIndex].count ++;
+                if (emojiIndex > -1) { 
+                    emojis[emojiIndex].count = emojis[emojiIndex].count + 1; 
+                }
                 else {
+                    console.log('we dont have this emoji already');
                     article.emojis[article.emojis.length] = {
                         'emoji': req.body.emoji,
                         'count': 1
                     };
                 }
 
-                article.save(function(err) {
-                    if (err) {
-                        return res.json({ 
+                Article.update({
+                    source: article.source,
+                    headline: article.headline
+                }, {
+                    emojis: emojis
+                }, function(err, numberAffected, rawResponse) {
+                    if (err){
+                        res.json({ 
                             success: false, 
                             message: 'error saving emoji to article: ' + err
-                        });
+                        });  
+                    } else {
+                        res.json({ 
+                            success: true, 
+                            message: 'emoji saved to article successfully!',
+                            article: article,
+                        }); 
                     }
-                    
-                    res.json({ 
-                        success: true, 
-                        message: 'emoji saved to article successfully!',
-                        article: article
-                    });
-
                 });
             }
         });
