@@ -199,7 +199,7 @@ module.exports = function(app) {
             console.log(article.emojis);
 
             // sort the list of emojis first
-            _.orderBy(article.emojis, ['count', 'emoji'], ['asc', 'asc']);
+            article.emojis = _.orderBy(article.emojis, ['count'], ['desc']);
 
             // if there are less than 3 emojis, then fuck it, return all of them
             if (article.emojis.length < 3) {
