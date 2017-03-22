@@ -96,7 +96,7 @@ module.exports = function(app) {
     });
 
     // ARTICLES
-    // create a new word
+    // create a new article
     app.post('/api/articles', function(req, res) {
         
         // create a new article
@@ -179,19 +179,42 @@ module.exports = function(app) {
                 return res.json({ message: 'Article not found!'});
             }
 
-            res.json(articles);
+            //we need find the most popular emojis in the article
+            for(var count = 0; count < articles.length; count ++) {
+                var popularEmojis = getMostPopularEmojis(articles[count]);
+                articles[count].popularEmojis = [];
+                articles[count].popularEmojis = popularEmojis;
+
+                console.log('most popular! ' );
+                console.log(popularEmojis);
+            }
+
+            res.json({
+                articles: articles,
+                popularEmojis: popularEmojis
+            });
         });
+
+        function getMostPopularEmojis(article) {
+            console.log(article.emojis);
+
+            // sort the list of emojis first
+            _.orderBy(article.emojis, ['count', 'emoji'], ['asc', 'asc']);
+
+            // if there are less than 3 emojis, then fuck it, return all of them
+            if (article.emojis.length < 3) {
+                return article.emojis;
+            }
+
+            // If there are more than 3 emojis, then only take 3 emojs
+            return _.take(article.emojis, 3);
+        }
     });
 
     //EMOJIS
     // add an emoji to an article
     app.post('/api/emojis', function(req, res) {
-        // find the article that is passed in
-        console.log('got a request! Source: ' + req.body.source + ', headline: ' + req.body.headline);
-
-        // we need to make sure that we don't already have this article
-        // signed up with this email address
-
+        
         Article.find({
             source: req.body.source,
             headline: req.body.headline,
