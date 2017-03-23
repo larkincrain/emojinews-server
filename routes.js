@@ -99,11 +99,14 @@ module.exports = function(app) {
     // create a new article
     app.post('/api/articles', function(req, res) {
         
+        //get the current date
+        var date = new Date();
+
         // create a new article
         var newArticle = Article({
           source: req.body.source,
           headline: req.body.headline,
-          date: req.body.date
+          date: date
         });
 
         // we need to make sure that we don't already have this article
